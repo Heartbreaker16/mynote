@@ -21,8 +21,8 @@
       <div>六</div>
     </div>
     <div class='view'>
-      <navigator v-for='(v,i) in days_of_month' :key='i' :url="'../setTag/main?year='+year+'&month='+(month+1)+'&day='+v.date"
-      :class="[{day: v.date!=''},{red: v.tagged},{today: v.isToday}]">
+      <navigator v-for='(v,i) in days_of_month' :key='i' :url="v==='' ? '': '../setTag/main?year='+year+'&month='+(month+1)+'&day='+v.date"
+      :class="[{day: v.date!=''},{red: v.tagged},{today: v.isToday}]" :hover-class="v ? v.tagged ? 'fade' : 'hover' : ''">
         <div class='date'>{{v.date}}</div>
       </navigator>
     </div>     
@@ -53,7 +53,12 @@ export default {
   methods: {
     monthShift(shift){
       const targetDate = new Date(this.year, this.month + shift, 1)
-      this.change(targetDate)
+      const now = new Date()
+      if(targetDate.getFullYear() > now.getFullYear())
+        wx.showToast({ title: '还没到下个月呢~', icon:'none' })
+      else if (targetDate.getFullYear() === now.getFullYear() && targetDate.getMonth() > now.getMonth())
+        wx.showToast({ title: '还没到下个月呢~', icon:'none' })
+      else this.change(targetDate)
     },
     changeMonthView(){
       const today = new Date()
@@ -100,21 +105,42 @@ export default {
       })
     },
     overview(){
-      wx.request({
-        url: this.rootUrl + 'overview',
-        data: {
-          dateStr: `${this.year.toString().slice(-2)}${('0'+(this.month+1)).slice(-2)}`,
-          TGID: this.tags[this.selectedTagIndex].TGID,
-          USID: wx.getStorageSync('userInfo').USID
-        },
-        success: res => {
-          const shift = new Date(this.year, this.month, 1).getDay()
-          const days_of_month = this.days_of_month
-          days_of_month.forEach(v => {if(v!=='') v.tagged = false})
-          res.data.forEach(v => days_of_month[v + shift-1].tagged = true)
-          this.days_of_month = []
-          this.days_of_month = days_of_month
-        }
+      if(this.tags[this.selectedTagIndex])
+        wx.request({
+          url: this.rootUrl + 'overview',
+          data: {
+            dateStr: `${this.year.toString().slice(-2)}${('0'+(this.month+1)).slice(-2)}`,
+            TGID: this.tags[this.selectedTagIndex].TGID,
+            USID: wx.getStorageSync('userInfo').USID
+          },
+          success: res => {
+            const shift = new Date(this.year, this.month, 1).getDay()
+            const days_of_month = this.days_of_month
+            days_of_month.forEach(v => {if(v!=='') v.tagged = false})
+            res.data.forEach(v => days_of_month[v + shift-1].tagged = true)
+            this.days_of_month = []
+            this.days_of_month = days_of_month
+          }
+        })
+      else setTimeout(() => this.overview(), 80)
+    },
+    checkUpdate(){
+      const updateManager = wx.getUpdateManager()
+      updateManager.onCheckForUpdate( res => {
+        // 请求完新版本信息的回调
+        console.log(res)
+      })
+      updateManager.onUpdateReady( () => {
+        wx.showModal({
+          title: '更新提示',
+          content: '新版本已经准备好，是否重启应用？',
+          success(res) {
+            if (res.confirm) {
+              // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+              updateManager.applyUpdate()
+            }
+          }
+        })
       })
     }
   },
@@ -134,6 +160,7 @@ export default {
     })
   },
   onShow(){
+    this.checkUpdate()
     wx.getStorage({
       key:'tagChanged',
       success: () => {
