@@ -1,0 +1,134 @@
+Flex(display, justify = flex-start, align = stretch, direction = row)
+    display display
+    if (justify != flex-start)
+        justify-content justify
+    if (align != stretch)
+        align-items align
+    if (direction != row)
+        flex-direction direction
+
+Border(top = 1rpx, right, bottom, left, color = #EEE)
+    if (top != 0)
+        border-top top solid color
+    if (right != 0)
+        border-right right solid color
+    if (bottom != 0)
+        border-bottom bottom solid color
+    if (left != 0)
+        border-left left solid color
+
+BorderBox()
+    box-sizing border-box
+
+Font(size, height = size, weight = normal)
+    if(weight == normal)
+        font size / height !specified
+    else
+        font weight size / height !specified
+
+Height_Width(height, width = height)
+    height height
+    width width
+
+Background(bgcolor = #F6F6F6)
+    background bgcolor
+
+themeColor = #AA001A
+.LoadingMask
+    position fixed
+    Flex(flex,center,center)
+    background white
+    Height_Width(100%)
+    z-index 99999
+    img
+        Height_Width(40rpx)
+        animation loading 1s steps(12) infinite
+@-webkit-keyframes loading
+    0%
+        transform rotate(0)
+    to
+        transform rotate(1turn)
+.no-data
+  position fixed
+  Height_Width(100%)
+  Background()
+  Flex(flex,center,center,column)
+  Font(35rpx)
+  img
+    Height_Width(200rpx)
+    margin-bottom 20rpx
+.img-box
+    display flex
+    flex-wrap wrap
+    padding 0 40rpx 20rpx 40rpx
+    width 100%
+    BorderBox()
+    img
+        Height_Width(150rpx)
+        margin-top calc((100% - 150rpx * 4)/3)
+        &:nth-child(4n+1),&:nth-child(4n+2),&:nth-child(4n+3)
+            margin-right calc((100% - 150rpx * 4)/3)
+.subtitle
+    display flex
+    padding 27rpx 40rpx
+    font 27rpx / 36rpx !specified
+    word-wrap break-word
+    Border(1rpx, 0, 1rpx, 0)
+.greytitle
+    padding-left 40rpx
+    Font(30rpx, 70rpx)
+    color white
+    background grey
+.para-title
+  Flex(flex, , center)
+  Font(32rpx, 100rpx, bold)
+  color #424242
+  div
+    margin-right 20rpx
+    Height_Width(45rpx, 10rpx)
+    background themeColor
+.commit
+    Height_Width(150rpx,100%)
+    padding 40rpx calc(((100% - 250rpx) / 2))
+    BorderBox()
+    navigator, div, button
+        Height_Width(100%)
+        background themeColor
+        color white
+        text-align center
+        Font(33rpx, 70rpx)
+.between
+    justify-content space-between
+.list-input
+    Flex(flex, , center)
+    Height_Width(90rpx, 100%)
+    Font(30rpx, 35rpx)
+    background-color white
+    border-bottom 1rpx solid #EEE
+    BorderBox()
+    span
+        margin 0 30rpx
+        white-space nowrap
+    input
+        flex 1
+        margin-right 30rpx
+        text-align right
+        color #777
+    .unset
+        color #9B9B9B
+    navigator
+        overflow hidden
+        white-space nowrap
+        margin-right 30rpx
+        color #757575
+    >div, picker
+        margin-right 30rpx
+        color #757575
+.fade
+    opacity .5
+.hover
+    background-color #EFEFEF !important
+.hide
+    display none !important
+textarea
+    padding 10rpx

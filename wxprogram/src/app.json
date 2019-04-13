@@ -1,0 +1,34 @@
+{
+  "pages": [
+    "pages/monthView/main",
+    "pages/me/main",
+    "pages/login/main",
+    "pages/setTag/main"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999",
+    "backgroundColor": "#fafafa",
+    "selectedColor": "#333",
+    "borderStyle": "white",
+    "list": [
+      {
+        "text": "Apple",
+        "pagePath": "pages/monthView/main",
+        "iconPath": "static/images/apple_grey.png",
+        "selectedIconPath": "static/images/apple_black.png"
+      },
+      {
+        "text": "Android",
+        "pagePath": "pages/me/main",
+        "iconPath": "static/images/android_grey.png",
+        "selectedIconPath": "static/images/android_black.png"
+      }
+    ]
+  },
+  "debug": true
+}
