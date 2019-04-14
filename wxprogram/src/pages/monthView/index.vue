@@ -1,7 +1,7 @@
 <template>
   <div class="monthView">
     <div class="fix-bar">
-      <div class="left" @tap="monthShift(-1)" hover-class="left-hover"><div/></div>
+      <div class="left" @tap="monthShift(-1)" hover-class="left-hover hover" hover-stay-time=100><div/></div>
       <picker @tap="red=true" @cancel="red=false" @change="pickerConfirm" :class="{'red-text':red}" mode="date" fields='month'
         :value="year + '-' + (month+1)">
         <div class="picker-box">
@@ -9,7 +9,7 @@
           <div style='margin-left: 15rpx;' :class="red ? 'triangle-color':'triangle'"/>
         </div>
       </picker>
-      <div class="right" @tap="monthShift(1)" hover-class="right-hover"><div/></div>
+      <div class="right" @tap="monthShift(1)" hover-class="right-hover hover" hover-stay-time=100><div/></div>
     </div>
     <div class="calendar-head">
       <div>日</div>
@@ -186,12 +186,12 @@ export default {
       img
         Height_Width(30rpx)
     .left
-      width 70rpx
+      width 80rpx
       Flex(flex, center, center)
       div
         Triangle(left, 30rpx, 18rpx)
     .right
-      width 70rpx
+      width 80rpx
       Flex(flex, center, center)
       div
         Triangle(right, 30rpx, 18rpx)

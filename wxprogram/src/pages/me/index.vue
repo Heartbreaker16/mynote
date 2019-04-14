@@ -2,7 +2,7 @@
 <form @submit='submit'>
   <div class='account'>{{account}}</div>
   <input v-model='tag' name='tag' placeholder='请输入要添加的Tag' maxlength=10>
-  <button :disabled='tag.length===0 || submitting' type='primary' form-type='submit'>添加</button>
+  <button :disabled='inputDisabled' type='primary' form-type='submit'>添加</button>
 </form>
 </template>
 
@@ -15,23 +15,37 @@ export default {
       submitting: false
     }
   },
+  computed:{
+    inputDisabled(){
+      return this.tag.replace(/(^\s*)|(\s*$)/g,'').length === 0 || this.submitting
+    }
+  },
   methods: {
     submit(e){
-      this.submitting = true
-      const input = e.mp.detail.value
-      wx.request({
-        url: this.rootUrl + 'addTag',
-        method: 'POST',
-        data: {
-          tag: input.tag,
-          USID: wx.getStorageSync('userInfo').USID
-        },
-        success: res => {
-          this.tag = ''
-          wx.showToast({title: res.data})
-          this.submitting = false
-        }
-      })
+      const tag = e.mp.detail.value.tag.replace(/(^\s*)|(\s*$)/g,'')
+      if(tag)
+        wx.showModal({
+          title:'',
+          content:`确定要添加标签“${tag}”吗?`,
+          success: res => {
+            if(res.confirm){
+              this.submitting = true
+              wx.request({
+                url: this.rootUrl + 'addTag',
+                method: 'POST',
+                data: {
+                  tag,
+                  USID: wx.getStorageSync('userInfo').USID
+                },
+                success: res => {
+                  this.tag = ''
+                  wx.showToast({title: res.data})
+                  this.submitting = false
+                }
+              })
+            }
+          }
+        })
     }
   },
   onLoad(){
@@ -43,6 +57,7 @@ export default {
 .account
   text-align center
   margin-top 100rpx
+  Font(50rpx,60rpx,bold)
 input
   Height_Width(90rpx, 60%)
   padding 0 10rpx
