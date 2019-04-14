@@ -15,3 +15,7 @@ Vue.mixin({
 
 const app = new Vue(App)
 app.$mount()
+
+wx.setEnableDebug({
+  enableDebug: true
+})

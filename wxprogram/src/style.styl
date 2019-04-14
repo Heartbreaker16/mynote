@@ -33,7 +33,27 @@ Height_Width(height, width = height)
 Background(bgcolor = #F6F6F6)
     background bgcolor
 
+Triangle(direction,base,height,color=#BBB)
+    Height_Width(0)
+    if(direction==up)
+        border-bottom height solid color
+        border-left (base / 2) solid transparent
+        border-right (base / 2) solid transparent
+    if(direction==down)
+        border-top height solid color
+        border-left (base / 2) solid transparent
+        border-right (base / 2) solid transparent
+    if(direction==left)
+        border-right height solid color
+        border-top (base / 2) solid transparent
+        border-bottom (base / 2) solid transparent
+    if(direction==right)
+        border-left height solid color
+        border-top (base / 2) solid transparent
+        border-bottom (base / 2) solid transparent
+
 themeColor = #AA001A
+
 .LoadingMask
     position fixed
     Flex(flex,center,center)

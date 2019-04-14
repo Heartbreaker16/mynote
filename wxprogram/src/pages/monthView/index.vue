@@ -1,7 +1,7 @@
 <template>
   <div class="monthView">
     <div class="fix-bar">
-      <div class="left" @tap="monthShift(-1)" hover-class="left-hover"><div/>上一月</div>
+      <div class="left" @tap="monthShift(-1)" hover-class="left-hover"><div/></div>
       <picker @tap="red=true" @cancel="red=false" @change="pickerConfirm" :class="{'red-text':red}" mode="date" fields='month'
         :value="year + '-' + (month+1)">
         <div class="picker-box">
@@ -9,7 +9,7 @@
           <div style='margin-left: 15rpx;' :class="red ? 'triangle-color':'triangle'"/>
         </div>
       </picker>
-      <div class="right" @tap="monthShift(1)" hover-class="right-hover">下一月<div/></div>
+      <div class="right" @tap="monthShift(1)" hover-class="right-hover"><div/></div>
     </div>
     <div class="calendar-head">
       <div>日</div>
@@ -186,33 +186,27 @@ export default {
       img
         Height_Width(30rpx)
     .left
-      color #777
-      padding 0 20rpx 0 10rpx
+      width 70rpx
+      Flex(flex, center, center)
       div
         Triangle(left, 30rpx, 18rpx)
-        margin-right 15rpx
     .right
-      color #777
-      padding 0 10rpx 0 20rpx
+      width 70rpx
+      Flex(flex, center, center)
       div
         Triangle(right, 30rpx, 18rpx)
-        margin-left 15rpx
     .triangle
-      Triangle(down, 24rpx, 14rpx)
+      // Triangle(down, 24rpx, 14rpx)
   picker
     height 100rpx
     Font(35rpx, 50rpx, bold)
     .picker-box
       height 100rpx
       Flex(flex, , center)
-  .left-hover
-    color themeColor !important
-    div
-      border-right-color themeColor !important
-  .right-hover
-    color themeColor !important
-    div
-      border-left-color themeColor !important
+  .left-hover div
+    border-right-color themeColor !important
+  .right-hover div
+    border-left-color themeColor !important
   .triangle-color
     Triangle(up, 24rpx, 14rpx, themeColor)
 .calendar-head
