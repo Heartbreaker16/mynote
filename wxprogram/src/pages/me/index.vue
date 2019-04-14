@@ -39,7 +39,12 @@ export default {
                 },
                 success: res => {
                   this.tag = ''
-                  wx.showToast({title: res.data})
+                  const flag = res.data === '添加成功'
+                  wx.showToast({
+                    title: res.data,
+                    icon: flag ? 'success' : 'none'
+                  })
+                  if(flag) wx.setStorageSync('tagNeedRefresh',true)
                   this.submitting = false
                 }
               })

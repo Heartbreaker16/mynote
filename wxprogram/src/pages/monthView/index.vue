@@ -27,7 +27,7 @@
       </navigator>
     </div>     
     <div class='tags'>
-      <span v-for="(v, i) in tags" :key="i" @tap='selectedTagIndex=i' :class='{selected: i===selectedTagIndex}'>{{v.tag_name}}</span>
+      <span v-for="(v, i) in tags" :key="i" @tap='selectTag(i)' :class='{selected: i===selectedTagIndex}'>{{v.tag_name}}</span>
     </div>
   </div>
 </template>
@@ -41,13 +41,8 @@ export default {
       day: 999999999,
       days_of_month: [],
       tags: [],
-      selectedTagIndex: NaN,
+      selectedTagIndex: 0,
       red: false
-    }
-  },
-  watch:{
-    selectedTagIndex(){
-      this.overview()
     }
   },
   methods: {
@@ -92,6 +87,10 @@ export default {
         this.overview()
       }
     },
+    selectTag(i){
+      this.selectedTagIndex = i
+      this.overview()
+    },
     getAllTags(){
       wx.request({
         url: this.rootUrl + 'allMyTags',
@@ -100,7 +99,7 @@ export default {
         },
         success: res => {
           this.tags = res.data
-          this.selectedTagIndex = 0
+          this.selectTag(this.selectedTagIndex)
         }
       })
     },
@@ -145,6 +144,7 @@ export default {
     }
   },
   onLoad(){
+    wx.removeStorageSync('tagNeedRefresh')
     wx.getStorage({
       key: 'userInfo',
       success: () => {
@@ -160,9 +160,16 @@ export default {
     })
   },
   onShow(){
-    this.checkUpdate()
+    // this.checkUpdate()
     wx.getStorage({
-      key:'tagChanged',
+      key: 'tagNeedRefresh',
+      success: () => {
+        this.getAllTags()
+        wx.removeStorageSync('tagNeedRefresh')
+      }
+    })
+    wx.getStorage({
+      key: 'tagChanged',
       success: () => {
         this.overview()
         wx.removeStorageSync('tagChanged')
