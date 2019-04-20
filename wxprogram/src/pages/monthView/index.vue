@@ -244,7 +244,7 @@ export default {
     color white
     background themeColor
   .today
-    border 1rpx solid themeColor
+    border 1px solid blue
   .date
     // Font(30rpx)
     margin-bottom 10rpx

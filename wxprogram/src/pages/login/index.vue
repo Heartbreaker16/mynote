@@ -4,7 +4,8 @@
 <div class='text'>欢迎使用My Note</div>
 <input v-model='account' name='account' placeholder='请输入您的昵称' maxlength=10>
 <input type='password' v-model='password' name='password' placeholder='请输入您的密码' maxlength=20>
-<button :disabled="account === '' || password === '' || submitting" type='primary' form-type='submit' class='button'>{{register ? '注册' : '登录'}}</button>
+<input type='password' v-if='register' v-model='password_confirm' name='password_confirm' placeholder='请确认您的密码' maxlength=20>
+<button :disabled="account === '' || password === '' || register && password_confirm === '' || submitting" type='primary' form-type='submit' class='button'>{{register ? '注册' : '登录'}}</button>
 <div class='text-bottom'>
 <span v-if='!submitting' class='shift' @tap='shift'>{{register ? '登录账号' : '注册账号'}}</span>
 </div>
@@ -18,6 +19,7 @@ export default {
     return {
       account: '',
       password: '',
+      password_confirm: '',
       register: true,
       submitting: false
     }
@@ -30,9 +32,15 @@ export default {
     clear(){
       this.account = ''
       this.password = ''
+      this.password_confirm = ''
     },
     submit(e){
       const input = e.mp.detail.value
+      if(this.register && input.password !== input.password_confirm){
+        wx.showToast({title:'两次密码不一致',icon:'none'})
+        this.password_confirm = ''
+        return
+      }
       this.submitting = true
       wx.showLoading({title: `正在${this.register ? '注册' : '登录'}`})
       wx.request({
@@ -47,19 +55,15 @@ export default {
           if(this.register){
             if(res.data === '注册成功'){
               wx.showToast({title: res.data})
-              this.clear()
-            } else {
-              wx.showToast({title: res.data, icon:'none'})
               this.shift()
-              this.clear()
-            }
+            } else wx.showToast({title: res.data, icon:'none'})
           } else if (typeof res.data === 'string'){ //登录失败
-            this.clear()
             wx.showToast({title: res.data, icon:'none'})
           } else { //登录成功
             wx.setStorageSync('userInfo', res.data)
             wx.switchTab({url: '../me/main'})
           }
+          this.clear()
           this.submitting = false
         },
         fail: err => {
@@ -70,8 +74,7 @@ export default {
     }
   },
   onUnload(){
-    this.account = ''
-    this.password = ''
+    this.clear()
     this.register = true
   }
 }
