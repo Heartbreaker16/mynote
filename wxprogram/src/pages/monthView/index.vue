@@ -91,18 +91,6 @@ export default {
       this.selectedTagIndex = i
       this.overview()
     },
-    getAllTags(){
-      wx.request({
-        url: this.rootUrl + 'allMyTags',
-        data: {
-          USID: wx.getStorageSync('userInfo').USID
-        },
-        success: res => {
-          this.tags = res.data
-          this.selectTag(this.selectedTagIndex)
-        }
-      })
-    },
     overview(){
       if(this.tags[this.selectedTagIndex])
         wx.request({
@@ -110,7 +98,7 @@ export default {
           data: {
             dateStr: `${this.year.toString().slice(-2)}${('0'+(this.month+1)).slice(-2)}`,
             TGID: this.tags[this.selectedTagIndex].TGID,
-            USID: wx.getStorageSync('userInfo').USID
+            openid: wx.getStorageSync('openid')
           },
           success: res => {
             const shift = new Date(this.year, this.month, 1).getDay()
@@ -123,41 +111,21 @@ export default {
         })
       else setTimeout(() => this.overview(), 80)
     },
-    checkUpdate(){
-      const updateManager = wx.getUpdateManager()
-      updateManager.onCheckForUpdate( res => {
-        // 请求完新版本信息的回调
-        console.log(res)
-      })
-      updateManager.onUpdateReady( () => {
-        wx.showModal({
-          title: '更新提示',
-          content: '新版本已经准备好，是否重启应用？',
-          success(res) {
-            if (res.confirm) {
-              // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
-              updateManager.applyUpdate()
-            }
-          }
-        })
+    getAllTags(){
+      this.service.getAllTags(this.rootUrl).then( tags => {
+        this.tags = tags
+        this.selectTag(this.selectedTagIndex)
       })
     }
   },
   onLoad(){
     wx.removeStorageSync('tagNeedRefresh')
-    wx.getStorage({
-      key: 'userInfo',
-      success: () => {
-        const now = new Date()
-        this.year = now.getFullYear()
-        this.month = now.getMonth()
-        this.changeMonthView()
-        this.getAllTags()
-      },
-      fail: () => {
-        wx.redirectTo({url: '../login/main'})
-      }
-    })
+
+    const now = new Date()
+    this.year = now.getFullYear()
+    this.month = now.getMonth()
+    this.changeMonthView()
+    this.getAllTags()
   },
   onShow(){
     // this.checkUpdate()

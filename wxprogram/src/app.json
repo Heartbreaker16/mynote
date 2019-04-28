@@ -2,7 +2,6 @@
   "pages": [
     "pages/monthView/main",
     "pages/me/main",
-    "pages/login/main",
     "pages/setTag/main"
   ],
   "window": {

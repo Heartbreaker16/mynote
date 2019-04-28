@@ -20,7 +20,7 @@ export default {
         formdata.RCID = this.tags[i].RCID
       else formdata.TGID = this.tags[i].TGID
       formdata.record_time = record_time
-      formdata.USID = wx.getStorageSync('userInfo').USID
+      formdata.openid = wx.getStorageSync('openid')
       wx.request({
         url: this.rootUrl + 'changeTagStatusOnDate',
         data: formdata,
@@ -39,7 +39,7 @@ export default {
       wx.request({
         url: this.rootUrl + 'tagsOfDay',
         data: {
-          USID: wx.getStorageSync('userInfo').USID,
+          openid: wx.getStorageSync('openid'),
           record_time
         },
         success: res => {
