@@ -107,6 +107,7 @@ export default {
             res.data.forEach(v => days_of_month[v + shift-1].tagged = true)
             this.days_of_month = []
             this.days_of_month = days_of_month
+            wx.hideLoading()
           }
         })
       else setTimeout(() => this.overview(), 80)
@@ -120,7 +121,7 @@ export default {
   },
   onLoad(){
     wx.removeStorageSync('tagNeedRefresh')
-
+    wx.showLoading({title:'正在加载'})
     const now = new Date()
     this.year = now.getFullYear()
     this.month = now.getMonth()

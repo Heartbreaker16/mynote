@@ -13,7 +13,7 @@
     <img @tap='save' src='/static/images/save.png'>
     <img @tap='back' src='/static/images/back.png'>
   </div>
-  <button v-else @tap='add' form-type='submit'>添加</button>
+  <button v-else @tap='add'>添加</button>
 </div>
 </template>
 
@@ -22,49 +22,18 @@ export default {
   data() {
     return {
       tags: [],
-      editing: false,
       editingIndex: -2,
       typeText: '',
       submitting: false
     }
   },
   methods: {
-    submit(e){
-      const tag = e.mp.detail.value.tag.replace(/(^\s*)|(\s*$)/g,'')
-      if(tag)
-        wx.showModal({
-          title:'',
-          content:`确定要添加标签“${tag}”吗?`,
-          success: res => {
-            if(res.confirm){
-              this.submitting = true
-              wx.request({
-                url: this.rootUrl + 'addTag',
-                method: 'POST',
-                data: {
-                  tag,
-                  USID: wx.getStorageSync('userInfo').USID
-                },
-                success: res => {
-                  this.tag = ''
-                  const flag = res.data === '添加成功'
-                  wx.showToast({
-                    title: res.data,
-                    icon: flag ? 'success' : 'none'
-                  })
-                  if(flag) wx.setStorageSync('tagNeedRefresh',true)
-                  this.submitting = false
-                }
-              })
-            }
-          }
-        })
-    },
     edit(i) {
       this.editingIndex = i
       this.typeText = this.tags[i].tag_name
     },
     save() {
+      if(this.submitting) return
       const typeText = this.typeText.replace(/(^\s*)|(\s*$)/g,'')
       const tag_name = this.tags[Math.abs(this.editingIndex)].tag_name
       if (typeText === '')
@@ -90,7 +59,6 @@ export default {
             if(res.confirm)
               this.updateTag(typeText)
           }
-
         })
       else this.back()
     },
@@ -98,6 +66,8 @@ export default {
       this.editingIndex = -2
     },
     addTag(tag){
+      this.submitting = true
+      wx.showLoading({title:'正在操作'})
       wx.request({
         url: this.rootUrl + 'addTag',
         data: {
@@ -105,16 +75,22 @@ export default {
           openid: wx.getStorageSync('openid')
         },
         success: res => {
+          wx.hideLoading()
           if(res.data === 'ok'){
             wx.showToast({title: '添加成功'})
             this.editingIndex = -2
             wx.setStorageSync('tagNeedRefresh',true)
             this.getAllTags()
+          }else if(res.data === '标签已存在'){
+            wx.showToast({title: '标签已存在',icon:'none'})
           }
+          this.submitting = false
         }
       })
     },
     updateTag(tag_name){
+      this.submitting = true
+      wx.showLoading({title:'正在操作'})
       wx.request({
         url: this.rootUrl + 'updateTag',
         data: {
@@ -122,16 +98,19 @@ export default {
           TGID: this.tags[this.editingIndex].TGID
         },
         success: res => {
+          wx.hideLoading()
           if(res.data === 'ok'){
             wx.showToast({title: '修改成功'})
             this.editingIndex = -2
             wx.setStorageSync('tagNeedRefresh',true)
             this.getAllTags()
+            this.submitting = false
           }
         }
       })
     },
     _delete(i) {
+      if(this.submitting) return
       this.editingIndex = -2
       wx.showModal({
         title:'',
@@ -143,17 +122,21 @@ export default {
               content: '该操作不可撤销\n请慎重选择',
               success: res => {
                 if(res.confirm) {
+                  this.submitting = true
+                  wx.showLoading({title:'正在操作'})
                   wx.request({
                     url: this.rootUrl + 'deleteTag',
                     data: {
                       TGID: this.tags[i].TGID
                     },
                     success: res => {
+                      wx.hideLoading()
                       if(res.data === 'ok'){
                         wx.showToast({title:'删除成功'})
                         wx.setStorageSync('tagNeedRefresh',true)
                         this.getAllTags()
                       }
+                      this.submitting = false
                     }
                   })
                 }
@@ -176,6 +159,7 @@ export default {
   onLoad(){
     this.getAllTags()
     this.editingIndex = -2
+    this.submitting = false
   }
 }
 </script>
