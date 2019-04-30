@@ -88,22 +88,27 @@ export default {
         }
       })
     },
-    updateTag(tag_name){
+    updateTag(tag){
       this.submitting = true
       wx.showLoading({title:'正在操作'})
       wx.request({
         url: this.rootUrl + 'updateTag',
         data: {
-          tag_name,
-          TGID: this.tags[this.editingIndex].TGID
+          tag,
+          TGID: this.tags[this.editingIndex].TGID,
+
+          openid: wx.getStorageSync('openid')
         },
         success: res => {
           wx.hideLoading()
-          if(res.data === 'ok'){
+          if(res.data.msg === 'ok'){
             wx.showToast({title: '修改成功'})
             this.editingIndex = -2
             wx.setStorageSync('tagNeedRefresh',true)
             this.getAllTags()
+            this.submitting = false
+          } else if(res.data.code === 0){
+            wx.showToast({title: '该名称已存在',icon:'none'})
             this.submitting = false
           }
         }

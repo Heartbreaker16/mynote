@@ -27,18 +27,6 @@ export default {
     
   },
   onLoad(){
-    this.service.getOpenid().then(openid => {
-      wx.request({
-        url: this.rootUrl + 'register',
-        data: {
-          openid: wx.getStorageSync('openid')
-        },
-        success: res => {
-          if(res.data === 'ok')
-            wx.showToast({title:'OK'})
-        }
-      })
-    })
   }
 }
 </script>

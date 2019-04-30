@@ -2,7 +2,8 @@
   "pages": [
     "pages/monthView/main",
     "pages/me/main",
-    "pages/setTag/main"
+    "pages/setTag/main",
+    "pages/test/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -26,6 +27,12 @@
         "pagePath": "pages/me/main",
         "iconPath": "static/images/android_grey.png",
         "selectedIconPath": "static/images/android_black.png"
+      },
+      {
+        "text": "Windows",
+        "pagePath": "pages/test/main",
+        "iconPath": "static/images/windows_grey.png",
+        "selectedIconPath": "static/images/windows_black.png"
       }
     ]
   },

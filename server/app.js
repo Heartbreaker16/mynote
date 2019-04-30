@@ -97,6 +97,32 @@ app.get('/addTag', (req, res) => {
     connection.end()
   })
 })
+app.get('/updateTag', (req, res) => {
+  const connection = mysql.createConnection(connectSQLConfig)
+  connection.connect()
+  const data = req.query
+  let SQL = `
+      SELECT tags.*
+      FROM tags, users
+      WHERE tag_name = '${strFilter(data.tag)}' AND openid = '${data.openid}' AND users.USID = tags.USID
+    `
+  connection.query(SQL, (err, row) => {
+    if (err) throw err
+    if (row.length > 0) res.send({msg:'标签已存在', code: 0})
+    else {
+      SQL = `
+          UPDATE tags
+          SET tag_name = '${data.tag}'
+          WHERE TGID = '${(data.TGID)}'
+        `
+      connection.query(SQL, (err, row) => {
+        if (err) throw err
+        res.send({msg:'ok', code: 1})
+      })
+    }
+    connection.end()
+  })
+})
 app.get('/deleteTag', (req, res) => {
   const connection = mysql.createConnection(connectSQLConfig)
   connection.connect()
@@ -116,21 +142,6 @@ app.get('/deleteTag', (req, res) => {
       res.send('ok')
       connection.end()
     })
-  })
-})
-app.get('/updateTag', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
-  const data = req.query
-  const SQL = `
-      UPDATE tags
-      SET tag_name = '${data.tag_name}'
-      WHERE TGID = '${(data.TGID)}'
-    `
-  connection.query(SQL, (err, row) => {
-    if (err) throw err
-    res.send('ok')
-    connection.end()
   })
 })
 app.get('/tagsOfDay', (req, res) => {
