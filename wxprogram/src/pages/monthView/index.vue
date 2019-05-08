@@ -21,7 +21,7 @@
       <div>六</div>
     </div>
     <div class='view'>
-      <navigator v-for='(v,i) in days_of_month' :key='i' :url="v==='' ? '': '../setTag/main?year='+year+'&month='+(month+1)+'&day='+v.date"
+      <navigator v-for='(v,i) in days_of_month' :key='i' :url="v==='' ? '': '../singleDayTags/main?year='+year+'&month='+(month+1)+'&day='+v.date"
       :class="[{day: v.date!=''},{red: v.tagged},{today: v.isToday}]" :hover-class="v ? v.tagged ? 'fade' : 'hover' : ''">
         <div class='date'>{{v.date}}</div>
       </navigator>

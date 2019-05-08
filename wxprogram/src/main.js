@@ -10,7 +10,7 @@ Vue.mixin({
     return {
       service: null,
       // rootUrl: 'http://localhost:3000/'
-      rootUrl: 'http://101.132.123.189:1997/'
+      rootUrl: 'http://207.148.90.74:1997/'
     }
   },
   created() {

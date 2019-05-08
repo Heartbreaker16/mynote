@@ -1,30 +1,21 @@
 const express = require('express')
 const mysql = require('mysql')
-const strFilter = str => {
-  return str
-    .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
-    .replace(/"/g, '\\"')
+const connectMySQL = () => {
+  const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'newroot',
+    password: '123456',
+    database: 'note',
+    charset: 'utf8mb4'
+  })
+  connection.connect()
+  return connection
 }
-const correctTime = (myDate, format = 'date') => {
-  const twoNum = num => {
-    return ('0' + num).slice(-2)
-  }
-  switch (format) {
-    case 'date':
-      return `${myDate.getFullYear()}-${twoNum(myDate.getMonth() + 1)}-${twoNum(myDate.getDate())}`
-    case 'full':
-      return `${myDate.getFullYear()}-${twoNum(myDate.getMonth() + 1)}-${twoNum(myDate.getDate())} ${twoNum(myDate.getHours())}:${twoNum(myDate.getMinutes())}`
-    case 'DateObj':
-      return myDate
-  }
+const Encode = str => {
+  return Buffer.from(str).toString('base64')
 }
-const connectSQLConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'note',
-  charset: 'utf8mb4'
+const Decode = code => {
+  return Buffer.from(code, 'base64').toString()
 }
 const bodyParser = require('body-parser')
 
@@ -34,8 +25,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/register', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
+  const connection = connectMySQL()
   const user = req.query
   let SQL = `
     SELECT *
@@ -59,8 +49,7 @@ app.get('/register', (req, res) => {
   })
 })
 app.get('/allMyTags', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
+  const connection = connectMySQL()
   let SQL = `
     SELECT tags.*
     FROM tags, users
@@ -68,43 +57,42 @@ app.get('/allMyTags', (req, res) => {
   `
   connection.query(SQL, (err, row) => {
     if (err) throw err
+    row.forEach(v => v.tag_name = Decode(v.tag_name))
     res.send(row)
     connection.end()
   })
 })
 app.get('/addTag', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
+  const connection = connectMySQL()
   const data = req.query
   let SQL = `
       SELECT tags.*
       FROM tags, users
-      WHERE tag_name = '${strFilter(data.tag)}' AND openid = '${data.openid}' AND users.USID = tags.USID
+      WHERE tag_name = '${Encode(data.tag)}' AND openid = '${data.openid}' AND users.USID = tags.USID
     `
   connection.query(SQL, (err, row) => {
     if (err) throw err
-    if (row.length > 0) res.send('标签已存在')
+    if (row.length > 0) res.send({msg:'标签已存在', code: 0})
     else {
       SQL = `
           INSERT INTO tags ( tag_name, USID )
-          VALUES ('${strFilter(data.tag)}', (SELECT USID FROM users WHERE openid = '${data.openid}'))
+          VALUES ('${Encode(data.tag)}', (SELECT USID FROM users WHERE openid = '${data.openid}'))
         `
       connection.query(SQL, (err, row) => {
         if (err) throw err
-        res.send('ok')
+        res.send({msg:'ok', code: 1})
       })
     }
     connection.end()
   })
 })
 app.get('/updateTag', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
+  const connection = connectMySQL()
   const data = req.query
   let SQL = `
       SELECT tags.*
       FROM tags, users
-      WHERE tag_name = '${strFilter(data.tag)}' AND openid = '${data.openid}' AND users.USID = tags.USID
+      WHERE tag_name = '${Encode(data.tag)}' AND openid = '${data.openid}' AND users.USID = tags.USID
     `
   connection.query(SQL, (err, row) => {
     if (err) throw err
@@ -112,7 +100,7 @@ app.get('/updateTag', (req, res) => {
     else {
       SQL = `
           UPDATE tags
-          SET tag_name = '${data.tag}'
+          SET tag_name = '${Encode(data.tag)}'
           WHERE TGID = '${(data.TGID)}'
         `
       connection.query(SQL, (err, row) => {
@@ -124,8 +112,7 @@ app.get('/updateTag', (req, res) => {
   })
 })
 app.get('/deleteTag', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
+  const connection = connectMySQL()
   const data = req.query
   let SQL = `
       DELETE FROM records
@@ -145,8 +132,7 @@ app.get('/deleteTag', (req, res) => {
   })
 })
 app.get('/tagsOfDay', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
+  const connection = connectMySQL()
   let SQL = `
     SELECT TGID, RCID
     FROM records, users
@@ -163,16 +149,17 @@ app.get('/tagsOfDay', (req, res) => {
     `
     connection.query(SQL, (err, tags_row) => {
       if (err) throw err
-      tags_row.forEach(v => v.RCID = TGID_RCID[v.TGID])
+      tags_row.forEach(v => {
+        v.RCID = TGID_RCID[v.TGID]
+        v.tag_name = Decode(v.tag_name)
+      })
       res.send(tags_row)
     })
     connection.end()
   })
 })
 app.get('/changeTagStatusOnDate', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
-  // console.log(req.query) ;return
+  const connection = connectMySQL()
   const SQL = req.query.RCID ? 
     ` DELETE FROM records WHERE records.RCID = '${req.query.RCID}'
     `
@@ -187,8 +174,7 @@ app.get('/changeTagStatusOnDate', (req, res) => {
   })
 })
 app.get('/overview', (req, res) => {
-  const connection = mysql.createConnection(connectSQLConfig)
-  connection.connect()
+  const connection = connectMySQL()
   const SQL = `
     SELECT record_time
     FROM records, users

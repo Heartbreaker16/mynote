@@ -1,8 +1,8 @@
 {
   "pages": [
     "pages/monthView/main",
-    "pages/me/main",
-    "pages/setTag/main",
+    "pages/tags/main",
+    "pages/singleDayTags/main",
     "pages/test/main"
   ],
   "window": {
@@ -24,7 +24,7 @@
       },
       {
         "text": "Android",
-        "pagePath": "pages/me/main",
+        "pagePath": "pages/tags/main",
         "iconPath": "static/images/android_grey.png",
         "selectedIconPath": "static/images/android_black.png"
       },

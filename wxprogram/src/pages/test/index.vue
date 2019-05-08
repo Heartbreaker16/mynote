@@ -1,6 +1,8 @@
 <template> 
 <div class='root'>
-  <div v-for='(v,i) in colors' :key='i' :style="'background:'+v"/>
+  <div v-for='(v,i) in 600' :key='i'>
+    <div :style="'background:rgba('+ (i+2) * seed % 255 + ',' + (i+3) * seed % 255 + ',' + i * seed % 255 +','+ i * seed % 1+')'"/>
+  </div>
 </div>
 </template>
 
@@ -9,32 +11,31 @@ let record_time
 export default {
   data() {
     return {
-      colors: [
-        '#F00',
-        '#FFA500',
-        '#FF0',
-        '#6A5ACD',
-        '#00F',
-        '#F0F',
-        '#0FF',
-        '#555',
-        '#A52A2A',
-        '#FF1493',
-      ]
+      seed: 425.489
     }
   },
   methods: {
-    
+    setColor() {
+      setInterval(() => {this.seed = 500*Math.random()},500)
+    }
   },
   onLoad(){
+    this.setColor()
   }
 }
 </script>
 <style lang="stylus" scoped>
 .root
-  Flex(flex,center)
-  div
-    Height_Width(40rpx)
+  position fixed
+  Flex(flex,,center)
+  flex-wrap wrap
+  >div
+    Height_Width(50rpx)
+    Flex(flex,center,center)
+    border 1rpx solid
     border-radius 50%
-    margin 6rpx calc((100% - 7 * 40rpx)/((7 - 1)*2 + 2))
+    div
+      Height_Width(50%)
+      border 1rpx solid black
+      border-radius 50%
 </style>

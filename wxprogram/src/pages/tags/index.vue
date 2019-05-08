@@ -76,13 +76,13 @@ export default {
         },
         success: res => {
           wx.hideLoading()
-          if(res.data === 'ok'){
+          if(res.data.msg === 'ok'){
             wx.showToast({title: '添加成功'})
             this.editingIndex = -2
             wx.setStorageSync('tagNeedRefresh',true)
             this.getAllTags()
-          }else if(res.data === '标签已存在'){
-            wx.showToast({title: '标签已存在',icon:'none'})
+          }else if(res.data.code === 0){
+            wx.showToast({title: '已存在同名标签', icon:'none'})
           }
           this.submitting = false
         }
@@ -96,7 +96,6 @@ export default {
         data: {
           tag,
           TGID: this.tags[this.editingIndex].TGID,
-
           openid: wx.getStorageSync('openid')
         },
         success: res => {
@@ -108,7 +107,7 @@ export default {
             this.getAllTags()
             this.submitting = false
           } else if(res.data.code === 0){
-            wx.showToast({title: '该名称已存在',icon:'none'})
+            wx.showToast({title: '已存在同名标签', icon:'none'})
             this.submitting = false
           }
         }
