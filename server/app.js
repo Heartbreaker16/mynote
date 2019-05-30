@@ -1,5 +1,6 @@
 const express = require('express')
 const mysql = require('mysql')
+const FilePath = require('path').join(__dirname, 'files')
 const connectMySQL = () => {
   const connection = mysql.createConnection({
     host: 'localhost',
@@ -23,6 +24,7 @@ const app = express()
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.static(FilePath))
 
 app.get('/register', (req, res) => {
   const connection = connectMySQL()
@@ -43,9 +45,9 @@ app.get('/register', (req, res) => {
       connection.query(SQL, (err, row) => {
         if (err) throw err
         res.send('ok')
+        connection.end()
       })
     }
-    connection.end()
   })
 })
 app.get('/allMyTags', (req, res) => {
@@ -57,7 +59,7 @@ app.get('/allMyTags', (req, res) => {
   `
   connection.query(SQL, (err, row) => {
     if (err) throw err
-    row.forEach(v => v.tag_name = Decode(v.tag_name))
+    row.forEach(v => v.tag_name = Decode(v.tag_name).replace(v.USID.toString(),''))
     res.send(row)
     connection.end()
   })
@@ -65,50 +67,59 @@ app.get('/allMyTags', (req, res) => {
 app.get('/addTag', (req, res) => {
   const connection = connectMySQL()
   const data = req.query
-  let SQL = `
-      SELECT tags.*
-      FROM tags, users
-      WHERE tag_name = '${Encode(data.tag)}' AND openid = '${data.openid}' AND users.USID = tags.USID
-    `
+  let SQL = `SELECT USID FROM users WHERE openid = '${data.openid}'`
   connection.query(SQL, (err, row) => {
-    if (err) throw err
-    if (row.length > 0) res.send({msg:'标签已存在', code: 0})
-    else {
-      SQL = `
+    const USID = row[0].USID
+    SQL = `
+      SELECT *
+      FROM tags
+      WHERE tag_name = '${Encode(USID + data.tag)}' AND USID = ${USID}
+    `
+    connection.query(SQL, (err, row) => {
+      if (err) throw err
+      if (row.length > 0) res.send({msg:'标签已存在', code: 0})
+      else {
+        SQL = `
           INSERT INTO tags ( tag_name, USID )
-          VALUES ('${Encode(data.tag)}', (SELECT USID FROM users WHERE openid = '${data.openid}'))
+          VALUES ('${Encode(USID + data.tag)}', ${USID})
         `
-      connection.query(SQL, (err, row) => {
-        if (err) throw err
-        res.send({msg:'ok', code: 1})
-      })
-    }
-    connection.end()
+        connection.query(SQL, (err, row) => {
+          if (err) throw err
+          res.send({msg:'ok', code: 1})
+          connection.end()
+        })
+      }
+    })
   })
 })
 app.get('/updateTag', (req, res) => {
   const connection = connectMySQL()
   const data = req.query
-  let SQL = `
-      SELECT tags.*
-      FROM tags, users
-      WHERE tag_name = '${Encode(data.tag)}' AND openid = '${data.openid}' AND users.USID = tags.USID
-    `
+  let SQL = `SELECT USID FROM users WHERE openid = '${data.openid}'`
   connection.query(SQL, (err, row) => {
     if (err) throw err
-    if (row.length > 0) res.send({msg:'标签已存在', code: 0})
-    else {
-      SQL = `
+    const USID = row[0].USID
+    SQL = `
+      SELECT *
+      FROM tags
+      WHERE tag_name = '${Encode(USID + data.tag)}' AND USID = ${USID}
+    `
+    connection.query(SQL, (err, row) => {
+      if (err) throw err
+      if (row.length > 0) res.send({msg:'标签已存在', code: 0})
+      else {
+        SQL = `
           UPDATE tags
-          SET tag_name = '${Encode(data.tag)}'
+          SET tag_name = '${Encode(USID + data.tag)}'
           WHERE TGID = '${(data.TGID)}'
         `
-      connection.query(SQL, (err, row) => {
-        if (err) throw err
-        res.send({msg:'ok', code: 1})
-      })
-    }
-    connection.end()
+        connection.query(SQL, (err, row) => {
+          if (err) throw err
+          res.send({msg:'ok', code: 1})
+          connection.end()
+        })
+      }
+    })
   })
 })
 app.get('/deleteTag', (req, res) => {
@@ -151,11 +162,11 @@ app.get('/tagsOfDay', (req, res) => {
       if (err) throw err
       tags_row.forEach(v => {
         v.RCID = TGID_RCID[v.TGID]
-        v.tag_name = Decode(v.tag_name)
+        v.tag_name = Decode(v.tag_name).replace(v.USID.toString(),'')
       })
       res.send(tags_row)
+      connection.end()
     })
-    connection.end()
   })
 })
 app.get('/changeTagStatusOnDate', (req, res) => {

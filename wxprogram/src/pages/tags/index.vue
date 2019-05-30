@@ -14,6 +14,7 @@
     <img @tap='back' src='/static/images/back.png'>
   </div>
   <button v-else @tap='add'>添加</button>
+  <div style='height:20rpx;width:100%;'/>
 </div>
 </template>
 
